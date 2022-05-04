@@ -3,16 +3,15 @@
   "description": "Easily see an inventory of destructured imports from specific packages in your codebase",
   "homepage": "https://github.com/bryantee/import-catalog",
   "version": "1.0.1",
-  "main": "bin/index.js",
+  "main": "./bin/index.js",
+  "bin": "./bin/index.js",
   "license": "MIT",
-  "bin": {
-    "import-catalog": "bin/index.js"
-  },
   "scripts": {
     "start": "ts-node src/cli.ts",
     "build": "tsc",
     "test": "jest",
-    "package": "pkg . --targets node14-macos-x64 --output import-catalog"
+    "package": "pkg . --targets node14-macos-x64 --output import-catalog",
+    "prepublish": "yarn build && yarn package"
   },
   "dependencies": {
     "glob": "^8.0.1",
