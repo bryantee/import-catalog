@@ -1,0 +1,1 @@
+import { shoes } from "./bar";

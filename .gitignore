@@ -1,0 +1,10 @@
+#ide
+.idea
+
+# directories
+dist
+build
+node_modules
+
+# executable
+import-catalog
