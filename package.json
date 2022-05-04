@@ -1,7 +1,8 @@
 {
   "name": "import-catalog",
   "description": "Easily see an inventory of destructured imports from specific packages in your codebase",
-  "version": "1.0.0",
+  "homepage": "https://github.com/bryantee/import-catalog",
+  "version": "1.0.1",
   "main": "bin/index.js",
   "license": "MIT",
   "bin": {
