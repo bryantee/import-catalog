@@ -1,27 +1,33 @@
-import minimist from "minimist";
+import { program } from "commander";
 import { catalogInventoryOfImportedMembers } from "./catalog";
+
+const package_json = require("../package.json");
 
 type Arguments = {
   patterns: string;
   packageName: string;
   modules: string[];
-  help?: boolean;
 };
 
+program
+  .name("import-catalog")
+  .version(package_json.version)
+  .description(package_json.description);
+
+program
+  .option(
+    "-p, --patterns <patterns>",
+    "Patterns that match files to be checked."
+  )
+  .option(
+    "-n, --packageName <packageName>",
+    "Name of the package or module to be checked for."
+  );
+
 async function run() {
-  const args = minimist<Arguments>(process.argv.slice(2), {
-    string: ["patterns", "packageName", "modules"],
-  });
-
-  if (args.help) {
-    console.log(
-      "Usage: catalog-import-use [--help] [--patterns=<glob>] [--packageName=<packageName>]"
-    );
-    process.exit(0);
-  }
-
-  const patterns = args.patterns ?? "src/**/*.ts";
-  const packageName = args.packageName;
+  const options = program.parse().opts<Arguments>();
+  const patterns = options.patterns ?? "src/**/*.ts";
+  const packageName = options.packageName;
 
   if (!packageName) {
     throw new Error("packageName is a required argument.");
