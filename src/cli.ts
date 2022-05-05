@@ -1,5 +1,5 @@
 import { program } from "commander";
-import { catalogInventoryOfImportedMembers } from "./catalog";
+import { catalogInventoryOfImportedMembers, presentCatalog } from "./catalog";
 
 const package_json = require("../package.json");
 
@@ -37,7 +37,8 @@ async function run() {
     patterns,
     packageName
   );
-  console.table(catalog);
+
+  presentCatalog(catalog);
 }
 
 (async () => {

@@ -73,3 +73,16 @@ export async function catalogInventoryOfImportedMembers(
     return acc;
   }, {} as Record<string, number>);
 }
+
+/**
+ * Prints a catalog of imported members in a readable format.
+ */
+export function presentCatalog(catalog: Record<string, number>): void {
+  const presentationData = Object.entries(catalog).map(([member, count]) => ({
+    Member: member,
+    "# of Imports": count,
+  }));
+
+  console.log("The following members were found to be imported:");
+  console.table(presentationData);
+}
