@@ -1,5 +1,6 @@
 import glob from "glob";
 import fs from "fs";
+import { AccumulationFunction, Config, Table } from "voici.js";
 
 /**
  * Promise wrapped glob call.
@@ -74,15 +75,32 @@ export async function catalogInventoryOfImportedMembers(
   }, {} as Record<string, number>);
 }
 
+const TABLE_CONFIG: Config = {
+  align: "LEFT",
+  body: {
+    accumulation: {
+      columns: [
+        {
+          column: "Imports",
+          func: AccumulationFunction.SUM,
+        },
+      ],
+    },
+  },
+};
+
 /**
  * Prints a catalog of imported members in a readable format.
  */
 export function presentCatalog(catalog: Record<string, number>): void {
   const presentationData = Object.entries(catalog).map(([member, count]) => ({
     Member: member,
-    "# of Imports": count,
+    Imports: count,
   }));
 
-  console.log("The following members were found to be imported:");
-  console.table(presentationData);
+  console.log("The following members were found to be imported: \n");
+
+  const table = new Table(presentationData, TABLE_CONFIG);
+
+  table.print();
 }
