@@ -98,6 +98,11 @@ export function presentCatalog(catalog: Record<string, number>): void {
     Imports: count,
   }));
 
+  if (presentationData.length === 0) {
+    console.log("No imports found.");
+    return;
+  }
+
   console.log("The following members were found to be imported: \n");
 
   const table = new Table(presentationData, TABLE_CONFIG);
