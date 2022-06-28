@@ -53,26 +53,42 @@ export function catalogSrcImports(src: string, packageName: string): string[] {
 }
 
 /**
+ * ```json
+ * {
+ *   "module": {
+ *      "count": 2,
+ *      "files": ["src/foo.ts", "src/bar.ts"]
+ * }
+ * ```
+ */
+type Catalog = Record<string, { count: number; files: string[] }>;
+
+/**
  * Catalogs imported members for a module given a src glob and a package name.
  */
 export async function catalogInventoryOfImportedMembers(
   patterns: string,
   packageName: string
-): Promise<Record<string, number>> {
+): Promise<Catalog> {
   // resolve files matching patterns
   const files = await findFilesMatchingGlob(patterns);
 
-  // return list of imported modules
+  // return catalog of imported modules
   return files.reduce((acc, file) => {
     const src = fs.readFileSync(file, "utf8");
     const matchingImports = catalogSrcImports(src, packageName);
 
     matchingImports.forEach((importMember) => {
-      acc[importMember] = (acc[importMember] || 0) + 1;
+      const module = {
+        count: acc[importMember] ? acc[importMember].count + 1 : 1,
+        files: acc[importMember] ? [...acc[importMember].files, file] : [file],
+      };
+
+      return (acc[importMember] = module);
     });
 
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Catalog);
 }
 
 const TABLE_CONFIG: Config = {
@@ -92,10 +108,14 @@ const TABLE_CONFIG: Config = {
 /**
  * Prints a catalog of imported members in a readable format.
  */
-export function presentCatalog(catalog: Record<string, number>): void {
-  const presentationData = Object.entries(catalog).map(([member, count]) => ({
+export function presentCatalog(
+  catalog: Catalog,
+  flags?: { showFiles?: boolean }
+): void {
+  const presentationData = Object.entries(catalog).map(([member, details]) => ({
     Member: member,
-    Imports: count,
+    Imports: details.count,
+    ...(flags?.showFiles ? { Files: details.files.join(", ") } : {}),
   }));
 
   if (presentationData.length === 0) {
