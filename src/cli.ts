@@ -7,6 +7,7 @@ type Arguments = {
   patterns: string;
   packageName: string;
   modules: string[];
+  files: boolean;
 };
 
 program
@@ -22,6 +23,10 @@ program
   .option(
     "-n, --packageName <packageName>",
     "Name of the package or module to be checked for."
+  )
+  .option(
+    "-f, --files",
+    "Flag to print the files that the module is imported from."
   );
 
 async function run() {
@@ -38,7 +43,7 @@ async function run() {
     packageName
   );
 
-  presentCatalog(catalog);
+  presentCatalog(catalog, { showFiles: options.files });
 }
 
 (async () => {
