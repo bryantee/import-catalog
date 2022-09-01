@@ -52,6 +52,37 @@ export function catalogSrcImports(src: string, packageName: string): string[] {
   return members.flat();
 }
 
+function deDupeArray<T>(list: T[]): T[] {
+  return [...new Set(list)];
+}
+
+/**
+ * Remove the entire path from a file until the last slash.
+ */
+function simplifyFileName(fileName: string): string {
+  return fileName.split("/").pop() || "";
+}
+
+function truncateFiles(files: string[], maxFiles: number): string[] {
+  return files.length > maxFiles ? files.slice(0, maxFiles) : files;
+}
+
+/**
+ * Generate truncated list of files and specify how many were truncated.
+ * @param files
+ * @param maxFiles
+ */
+function generateFilesPresentationString(
+  files: string[],
+  maxFiles: number
+): string {
+  const truncatedFiles = truncateFiles(files, maxFiles);
+  const truncated =
+    files.length > maxFiles ? `+${files.length - maxFiles}` : "";
+
+  return `${truncatedFiles.join(", ")} ${truncated}`;
+}
+
 /**
  * ```json
  * {
@@ -77,12 +108,17 @@ export async function catalogInventoryOfImportedMembers(
   return files.reduce((acc, file) => {
     const src = fs.readFileSync(file, "utf8");
     const matchingImports = catalogSrcImports(src, packageName);
+    const processedFileName = simplifyFileName(file);
 
     matchingImports.forEach((importMember) => {
       const module = {
         count: acc[importMember] ? acc[importMember].count + 1 : 1,
-        files: acc[importMember] ? [...acc[importMember].files, file] : [file],
+        files: acc[importMember]
+          ? [...acc[importMember].files, processedFileName]
+          : [processedFileName],
       };
+
+      module.files = deDupeArray(module.files);
 
       return (acc[importMember] = module);
     });
@@ -115,7 +151,9 @@ export function presentCatalog(
   const presentationData = Object.entries(catalog).map(([member, details]) => ({
     Member: member,
     Imports: details.count,
-    ...(flags?.showFiles ? { Files: details.files.join(", ") } : {}),
+    ...(flags?.showFiles
+      ? { Files: generateFilesPresentationString(details.files, 2) }
+      : {}),
   }));
 
   if (presentationData.length === 0) {
